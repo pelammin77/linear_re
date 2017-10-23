@@ -23,8 +23,19 @@ df['Daily_Change'] = (df['Adj. Close'] - df['Adj. Open']) /  df['Adj. Open'] * 1
 
 df = df[['Adj. Close', 'HL_PCT', 'Daily_Change', 'Adj. Volume']]
 forecast_col  = 'Adj. Close'
-df.fillna(-99999, inplace=True) #jos arvo puutuu niin sijoitetaan -99999
-forecast_out = int(math.ceil(0.01 * len(df)))
+df.fillna(-99999, inplace=True) #if value is missing value is: -99999
+forecast_out = int(math.ceil(0.01 * len(df))) #timescale is 34 days
+#print(forecast_out)
 df['label'] = df[forecast_col].shift(-forecast_out)
 df.dropna(inplace=True)
-print(df.tail())
+X = np.array(df.drop(['label'],1))
+y = np.array(df['label'])
+x = preprocessing.scale(X) # ei ehkä tarvita
+y = np.array(df['label'])
+#print(len(X), len(y))
+
+x_train, x_test, y_train, y_test = cross_validation.train_test_split(X, y, test_size=0.2)
+clf = LinearRegression()
+clf.fit(x_train, y_train)# training the classifier
+accuracy = clf.score(x_test, y_test)
+print(accuracy)
